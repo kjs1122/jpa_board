@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{/layout/basic:: setContent(~{this:: content})}">
+
+    <th:block th:fragment="content">
+
+        <h1 class="mt-4" th:text="#{page.title.register}"></h1>
+
+        <form th:action th:method="post" th:object="${dto}">
+
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-group">
+                <label th:for="title" th:text="#{label.dto.title}"></label>
+                <input type="text" class="form-control" th:field="*{title}" placeholder="Enter Title">
+                <div th:errors="*{title}"></div>
+            </div>
+            <div class="form-group">
+                <label th:for="content" th:text="#{label.dto.content}"></label>
+                <textarea class="form-control" rows="5" th:field="*{content}"></textarea>
+                <div th:errors="*{content}"></div>
+            </div>
+            <div class="th:form-group">
+                <label th:for="writerEmail" th:text="#{label.dto.writerEmail}"></label>
+                <input type="text" class="form-control" th:field="*{writerEmail}" placeholder="Writer Email">
+                <div th:errors="*{writerEmail}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" th:text="#{button.submit}"></button>
+
+        </form>
+
+    </th:block>
+
+
+
+</th:block>
+
+</html>

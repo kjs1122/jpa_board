@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.zerock.board.entity.Board;
+import org.zerock.board.search.SearchBoardRepository;
 
 import java.util.List;
 
-public interface BoardRepository extends JpaRepository<Board, Long> {
+public interface BoardRepository extends JpaRepository<Board, Long>, SearchBoardRepository {
 
     @Query("select b, w from Board b left join b.writer w where b.bno =:bno")
     Object getBoardWithWriter(@Param("bno") Long bno);
@@ -24,4 +25,10 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             " GROUP BY b",
             countQuery = "SELECT count(b) FROM Board b")
     Page<Object[]> getBoardWithReplyCount(Pageable pageable);
+
+    @Query("SELECT b, w, count(r)" +
+            "FROM Board b LEFT JOIN b.writer w " +
+            "LEFT JOIN Reply r ON r.board = b " +
+            "WHERE b.bno = :bno")
+    Object getBoardByBno(@Param("bno") Long bno);
 }

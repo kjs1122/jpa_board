@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{/layout/basic :: setContent(~{this:: content})}">
+
+    <th:block th:fragment="content">
+
+        <h1 class="mt-4">[[#{page.title.list}]]
+            <span>
+                <a th:href="@{/board/register}">
+                    <button type="button" class="btn btn-outline-primary"
+                            th:text="#{button.register}">
+                    </button>
+                </a>
+            </span>
+        </h1>
+
+        <form action="/board/list" th:object="${pageRequestDTO}" method="get" id="searchForm">
+            <div class="input-group">
+                <input type="hidden" th:field="*{page}">
+                <div class="input-group-prepend">
+                    <select class="custom-select" name="type">
+                        <option th:selected="*{type == null}" th:text="#{option.null}"/>
+                        <option th:value="t" th:selected="*{type == 't'}" th:text="#{option.title}"/>
+                        <option th:value="c" th:selected="*{type == 'c'}" th:text="#{option.content}"/>
+                        <option th:value="w" th:selected="*{type == 'w'}" th:text="#{option.writer}"/>
+                        <option th:value="tc" th:selected="*{type == 'tc'}" th:text="#{option.title.content}"/>
+                        <option th:value="tcw" th:selected="*{type == 'tcw'}" th:text="#{option.title.content.writer}"/>
+                    </select>
+                </div>
+                <input class="form-control" th:field="*{keyword}">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary btn-search"
+                            th:text="#{button.search}">
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-clear"
+                            th:text="#{button.clear}">
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col" th:text="#{label.dto.bno}"></th>
+                <th scope="col" th:text="#{label.dto.title}"></th>
+                <th scope="col" th:text="#{label.dto.regDate}"></th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr th:each="dto : ${result.dtoList}">
+                <th scope="row">
+                    <a th:href="@{/board/read(
+                    bno = ${dto.bno},
+                    page = ${result.page},
+                    type = ${pageRequestDTO.type},
+                    keyword = ${pageRequestDTO.keyword}
+                    )}"
+                       th:text="${dto.bno}">
+                    </a>
+                </th>
+                <td>[[${dto.title}]] -------------- [<b th:text="${dto.replyCount}"></b>]</td>
+                <td>[[${dto.writerName}]] <small>[[${dto.writerEmail}]]</small></td>
+                <td th:text="${#temporals.format(dto.regDate, 'yyyy/MM/dd')}"></td>
+            </tr>
+
+            </tbody>
+        </table>
+
+        <ul class="pagination h-100 justify-content-center align-items-center">
+            <li class="page-item " th:if="${result.prev}">
+                <a class="page-link" th:href="@{/board/list(
+                page = ${result.start - 1},
+                type = ${pageRequestDTO.type},
+                keyword = ${pageRequestDTO.keyword}
+                )}" tabindex="-1">Previous</a>
+            </li>
+
+            <li th:class="'page-item ' + ${result.page == page ? 'active' : ''}"
+                th:each="page : ${result.pageList}">
+                <a class="page-link" th:href="@{/board/list(
+                page = ${page},
+                type = ${pageRequestDTO.type},
+                keyword = ${pageRequestDTO.keyword}
+                )}">[[${page}]]</a>
+            </li>
+
+            <li class="page-item" th:if="${result.next}">
+                <a class="page-link" th:href="@{/board/list(
+                page = ${result.end + 1},
+                type = ${pageRequestDTO.type},
+                keyword = ${pageRequestDTO.keyword}
+                )}">Next</a>
+            </li>
+        </ul>
+
+        <th:block th:replace="~{/modal/complete:: modal}"></th:block>
+
+        <script th:inline="javascript">
+
+            const searchForm = document.querySelector("#searchForm");
+            const btnSearch = document.querySelector(".btn-search");
+            const btnClear = document.querySelector(".btn-clear");
+
+            btnSearch.addEventListener("click", function () {
+                searchForm.submit();
+            });
+
+            btnClear.addEventListener("click", function () {
+                const typeTag = document.querySelector("select[name='type']");
+                const keywordTag = document.querySelector("input[name='keyword']");
+                const pageTag = document.querySelector("input[name='page']");
+
+                pageTag.remove();
+                typeTag.remove();
+                keywordTag.remove();
+                searchForm.submit();
+            });
+
+        </script>
+
+    </th:block>
+
+
+</th:block>
+</html>

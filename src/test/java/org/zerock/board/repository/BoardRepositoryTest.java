@@ -7,8 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.zerock.board.dto.BoardDTO;
 import org.zerock.board.entity.Board;
 import org.zerock.board.entity.Member;
+import org.zerock.board.service.BoardService;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
@@ -23,6 +25,10 @@ class BoardRepositoryTest {
 
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private BoardService boardService;
+
+
 
     @Test
     void insertBoard() {
@@ -85,5 +91,49 @@ class BoardRepositoryTest {
             System.out.println(Arrays.toString(arr));
         });
     }
+
+    @Test
+    void testRead3() {
+        Object result = boardRepository.getBoardByBno(100L);
+        Object[] arr = (Object[]) result;
+
+        System.out.println(Arrays.toString(arr));
+
+
+    }
+
+    @Test
+    void register() {
+
+        BoardDTO dto = BoardDTO.builder()
+                .title("한글 테스트")
+                .content("한글 테스트")
+                .writerEmail("user55@aaa.com")
+                .build();
+
+        Board board = boardService.dtoToEntity(dto);
+        System.out.println("board = " + board);
+        Member member = Member.builder().email(dto.getWriterEmail()).build();
+        System.out.println("member = " + member);
+
+        boardRepository.save(board);
+    }
+
+
+    @Test
+    void testSearch1() {
+
+        boardRepository.search1();
+    }
+    @Test
+    void testSearchPage() {
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").descending());
+
+        boardRepository.searchPage("t", "1", pageable);
+
+    }
+
+
 
 }

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{/layout/basic :: setContent(~{this :: content})}">
+
+    <th:block th:fragment="content">
+
+        <h1 class="mt-4" th:text="#{page.title.read}"></h1>
+
+        <div class="form-group">
+            <label th:for="gno" th:text="#{label.dto.bno}" ></label>
+            <input type="text" class="form-control" th:field="${dto.bno}" readonly>
+        </div>
+        <div class="form-group">
+            <label th:for="title" th:text="#{label.dto.title}" ></label>
+            <input type="text" class="form-control" th:field="${dto.title}" readonly>
+        </div>
+        <div class="form-group">
+            <label th:for="content" th:text="#{label.dto.content}" ></label>
+            <textarea class="form-control" rows="5" th:field="${dto.content}" readonly />
+        </div>
+        <div class="form-group">
+            <label th:for="writer" th:text="#{label.dto.writer}" ></label>
+            <input type="text" class="form-control" th:field="${dto.writerName}" readonly>
+        </div>
+        <div class="form-group">
+            <label th:for="regDate" th:text="#{label.dto.regDate}" ></label>
+            <input type="text" class="form-control" id="regDate" name="regDate"
+                   th:value="${#temporals.format(dto.regDate, 'yyyy/MM/dd HH:mm:ss')}" readonly>
+        </div>
+        <div class="form-group">
+            <label th:for="modDate" th:text="#{label.dto.modDate}" ></label>
+            <input type="text" class="form-control" id="modDate" name="modDate"
+                   th:value="${#temporals.format(dto.modDate, 'yyyy/MM/dd HH:mm:ss')}" readonly>
+        </div>
+
+        <a th:href="@{/board/modify(
+            bno = ${dto.bno},
+            page = ${requestDTO.page},
+            type = ${requestDTO.type},
+            keyword = ${requestDTO.keyword}
+            )}">
+            <button type="button" class="btn btn-primary" th:text="#{button.modify}"></button>
+        </a>
+        <a th:href="@{/board/list(
+            page=${requestDTO.page},
+            type = ${requestDTO.type},
+            keyword = ${requestDTO.keyword}
+            )}">
+            <button type="button" class="btn btn-primary" th:text="#{button.list}"></button>
+        </a>
+
+
+    </th:block>
+
+</th:block>
+
+</html>
