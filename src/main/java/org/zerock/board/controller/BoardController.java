@@ -66,7 +66,7 @@ public class BoardController {
     }
 
     @GetMapping("/read")
-    public void read(
+    public String read(
             @ModelAttribute("requestDTO") PageRequestDTO pageRequestDTO,
             Long bno,
             Model model) {
@@ -78,6 +78,8 @@ public class BoardController {
         log.info(boardDTO);
 
         model.addAttribute("dto", boardDTO);
+
+        return "board/read";
     }
     @GetMapping("/modify")
     public String modify(
