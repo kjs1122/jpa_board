@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="reply">
+
+    <!--Reply-->
+    <div>
+        <div class="mt-4">
+            <h5>
+                <span class="badge badge-info addReply" th:text="#{reply.add}"></span>
+            </h5>
+            <h5>
+                <span class="badge badge-secondary replyCount" th:text="#{reply.count(${dto.replyCount})}"></span>
+            </h5>
+        </div>
+        <div class="list-group replyList">
+
+        </div>
+    </div>
+
+    <!--Reply Modal-->
+    <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" th:text="#{modal.title.list}"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="Close">
+                        <span aria-hidden="true" th:text="#{modal.btn.close}"></span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="replyText" placeholder="Reply Text...">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="replyer" placeholder="Replyer">
+                        <input type="hidden" name="rno">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger replyRemove"
+                            th:text="#{button.remove}">
+                    </button>
+                    <button type="button" class="btn btn-warning replyModify"
+                            th:text="#{button.modify}">
+                    </button>
+                    <button type="button" class="btn btn-primary replySave"
+                            th:text="#{button.save}">
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary replyClose"
+                            th:text="#{button.close}" data-dismiss="modal">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script th:inline="javascript">
+
+        /**
+         * reply
+         */
+        const bno = [[${dto.bno}]];
+
+        const listGroup = document.querySelector(".replyList");
+        const replyCount = document.querySelector(".replyCount");
+
+        /**
+         * replyModal
+         */
+        const modal = document.querySelector(".modal");
+        const modalFooter = document.querySelector(".modal-footer");
+        const addReply = document.querySelector(".addReply");
+        const replySave = document.querySelector(".replySave");
+        const replyClose = document.querySelector(".replyClose");
+        const replyTopClose = document.querySelector(".close");
+        const replyModify = document.querySelector(".replyModify");
+        const replyRemove = document.querySelector(".replyRemove");
+        const replyText = document.querySelector("input[name='replyText']")
+        const replyer = document.querySelector("input[name='replyer']")
+        const replyRno = document.querySelector("input[name='rno']")
+
+
+        replyCount.addEventListener("click", function () {
+            loadJSONData();
+        });
+
+        replyTopClose.addEventListener("click", function () {
+            modal.style.display = "none";
+        });
+        replyClose.addEventListener("click", function () {
+            modal.style.display = "none";
+        });
+
+        listGroup.addEventListener("click", function (e) {
+            const currentTarget = e.target.closest("div");
+            const rno = currentTarget.dataset.rno;
+
+            replyText.value = currentTarget.firstChild.nextElementSibling.innerHTML;
+            replyer.value = currentTarget.firstChild.nextElementSibling.nextElementSibling.innerHTML;
+            replyRno.value = rno;
+
+            replySave.style.display = "none";
+
+            modal.style.display = "flex";
+        });
+
+        replyRemove.addEventListener("click", function () {
+
+            const rno = replyRno.value;
+
+            $.ajax({
+                url: "/replies/" + rno,
+                method: "delete",
+                success: function (result) {
+                    if (result === "success") {
+                        alert("댓글이 삭제되었습니다");
+                        modal.style.display = "none";
+                        loadJSONData();
+                    }
+                },
+            })
+        });
+
+        replyModify.addEventListener("click", function () {
+
+            const reply = {
+                rno: replyRno.value,
+                bno: bno,
+                text: replyText.value,
+                replyer: replyer.value
+            }
+
+            $.ajax({
+                url: "/replies/" + replyRno.value,
+                method: "put",
+                data: JSON.stringify(reply),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result === "success") {
+                        alert("댓글이 수정되었습니다");
+                        modal.style.display = "none";
+                        loadJSONData();
+                    }
+
+                }
+            })
+        });
+
+
+        /**
+         * 댓글 날짜 형식 지정
+         */
+        function formatTime(str) {
+
+            const date = new Date();
+
+            return date.getFullYear() + '/' +
+                (date.getMonth() + 1) + '/' +
+                date.getDate() + ' ' +
+                date.getMinutes();
+        }
+
+        /**
+         * 댓글리스트 출력
+         */
+        function loadJSONData() {
+
+            $.getJSON('/replies/board/' + bno, function (arr) {
+
+                let str = "";
+
+                replyCount.innerHTML = " Reply Count " + arr.length;
+
+                $.each(arr, function (idx, reply) {
+
+                    str += ' <div class="card-body" data-rno="'+reply.rno+'"><b>' + reply.rno + '</b>';
+                    str += ' <h5 class="card-title">' + reply.text + '</h5>';
+                    str += ' <h6 class="card-subtitle mb-2 text-muted">' + reply.replyer + '</h6>';
+                    str += ' <p class="card-text">' + formatTime(reply.regDate) + '</p>';
+                    str += ' </div>';
+
+                    listGroup.innerHTML = str;
+                });
+            });
+
+        }
+
+
+        /**
+         * replyModal
+         */
+
+        addReply.addEventListener("click", function () {
+            modal.style.display = "flex";
+
+            replyText.setAttribute("value", "");
+            replyer.setAttribute("value", "");
+
+            document.querySelectorAll(".modal-footer .btn").forEach(btn => btn.style.display = "none");
+            document.querySelectorAll(".replySave, .replyClose").forEach(btn => btn.style.display = "flex");
+        });
+
+        replySave.addEventListener("click", function () {
+
+            const reply = {
+                bno : bno,
+                text : replyText.value,
+                replyer : replyer.value
+            }
+
+            $.ajax({
+                url: '/replies/',
+                method: 'post',
+                data: JSON.stringify(reply),
+                contentType : 'application/json; charset=utf-8',
+                dataType: 'json',
+                success : function (data) {
+                    console.log(data);
+
+                    const newRno = parseInt(data);
+
+                    alert(newRno + "번 댓글이 등록되었습니다.");
+                    modal.style.display = "none";
+                    loadJSONData();
+                }
+            })
+        });
+    </script>
+
+</th:block>
+
+</html>
